@@ -226,7 +226,7 @@ export default function SignIn(props) {
             </FormControl>
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
+              label="기억하기"
             />
             <ForgotPassword open={open} handleClose={handleClose} />
             <Button

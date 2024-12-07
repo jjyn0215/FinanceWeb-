@@ -115,7 +115,7 @@ function SideMenuMobile({ open, toggleDrawer }) {
         </Stack>
         <Stack sx={{ p: 2 }}>
           <Button variant="outlined" fullWidth startIcon={<LogoutRoundedIcon />} onClick={handleClick}>
-            Logout
+            로그아웃
           </Button>
         </Stack>
       </Stack>
