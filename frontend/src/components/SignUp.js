@@ -121,7 +121,6 @@ export default function SignUp(props) {
             throw new Error('Unauthorized');
           }
         })
-        .then((data) => console.log(data))
         .catch((err) => console.error(err));
     });
 

@@ -122,6 +122,22 @@ const Mainchart = () => {
     // });
 
     socket.on("notFound", () => {
+      fetch('/api/remove', {
+        method: 'POST',
+        credentials: 'include', // 쿠키 포함
+        headers: {
+          'Content-Type': 'application/json',
+        },  
+        body: JSON.stringify({
+          ticker: subPath
+        }),
+      })
+        .then((response) => {
+          if (response.ok) {
+          } else {
+          }
+        })
+        .catch((err) => console.error(err));
       navigate("/404")
     });
     

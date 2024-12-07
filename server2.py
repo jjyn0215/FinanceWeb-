@@ -47,6 +47,7 @@ class ChartNamespace(Namespace):
         del tickers[request.sid]
 
     def on_join(self, ticker):
+        ticker = ticker.upper()
         dat = yf.Ticker(ticker)
         test = dat.info
         if test['trailingPegRatio'] == None:
@@ -96,7 +97,7 @@ def add_stock():
         user.ticker_history = json.dumps(history_ticker)
 
         history_name = json.loads(user.name_history) if user.name_history else []
-        if ticker in history_name: history_name.remove(name)
+        if name in history_name: history_name.remove(name)
         history_name.append(name)
         history_name = history_name[-10:]
         user.name_history = json.dumps(history_name)
@@ -111,13 +112,23 @@ def add_stock():
 # def recent_stocks():
     
 
-# @app.route('/api/remove', methods=['GET'])
-# def remove_stocks():
-#     data = request.json
-#     ticker = data.get('ticker')
-#     user = User.query.filter_by(email=session['user']).first()
-#     if not user:
-#         return jsonify({'message': 'User not found'}), 400
+@app.route('/api/remove', methods=['POST'])
+def remove_stocks():
+    data = request.json
+    ticker = data.get('ticker')
+    user = User.query.filter_by(email=session['user']).first()
+    if not user:
+        return jsonify({'message': 'User not found'}), 400
+
+    try: 
+        history_ticker = json.loads(user.ticker_history) if user.ticker_history else []
+        if ticker in history_ticker: history_ticker.remove(ticker)
+        user.ticker_history = json.dumps(history_ticker)
+
+        db.session.commit()
+        return jsonify({'message': 'Success.'}), 201
+    except:
+        return jsonify({'message': 'Failed'}), 400
     
 
 

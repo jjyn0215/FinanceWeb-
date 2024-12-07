@@ -97,7 +97,6 @@ export default function SignIn(props) {
             throw new Error('Unauthorized');
           }
         })
-        .then((data) => console.log(data))
         .catch((err) => console.error(err));
     });
 
@@ -122,7 +121,7 @@ export default function SignIn(props) {
     
         if (response.ok) {
           let username = await response.json();
-          navigate("/Chart/005930.KS", { state: { type: "login", message: "환영합니다, " + username.username + "님!"}}); // React Router 사용 시
+          navigate("/Chart/NVDA", { state: { type: "login", message: "환영합니다, " + username.username + "님!"}}); // React Router 사용 시
         } else {
           const errorData = await response.json();
           if (errorData.message === "Invalid credentials") {
@@ -147,16 +146,16 @@ export default function SignIn(props) {
   
       if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
         setEmailError(true);
-        setEmailErrorMessage('Please enter a valid email address.');
+        setEmailErrorMessage('유효한 이메일을 입력하세요.');
         isValid = false;
       } else {
         setEmailError(false);
         setEmailErrorMessage('');
       }
   
-      if (!password.value || password.value.length < 6) {
+      if (!password.value || password.value.length < 8) {
         setPasswordError(true);
-        setPasswordErrorMessage('Password must be at least 6 characters long.');
+        setPasswordErrorMessage('유효한 비밀번호를 입력하세요.');
         isValid = false;
       } else {
         setPasswordError(false);
