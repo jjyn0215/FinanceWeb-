@@ -11,7 +11,7 @@ ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <StyledEngineProvider injectFirst>
-        <SnackbarProvider maxSnack={3} anchorOrigin={{vertical: "bottom", horizontal: "left"}} TransitionComponent={Grow}>
+        <SnackbarProvider maxSnack={3} anchorOrigin={{vertical: "bottom", horizontal: "center"}} TransitionComponent={Grow}>
           <App />
         </SnackbarProvider>
       </StyledEngineProvider>

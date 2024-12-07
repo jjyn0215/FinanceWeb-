@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Stack from "@mui/material/Stack";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
-import CustomDatePicker from "./CustomDatePicker";
-import NavbarBreadcrumbs from "./NavbarBreadcrumbs";
 import MenuButton from "./MenuButton";
 import ColorModeIconDropdown from "../theme/ColorModeIconDropdown";
 import Typography from "@mui/material/Typography";
@@ -13,10 +11,12 @@ import Chip from "@mui/material/Chip";
 import io from "socket.io-client";
 import { enqueueSnackbar, closeSnackbar } from "notistack";
 import Skeleton from "@mui/material/Skeleton";
+import SideMenuMobile from './SideMenuMobile';
+import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 
 export default function Header() {
   const theme = useTheme();
-  const { "*": subPath } = useParams();
+  const { ticker : subPath } = useParams();
   const [initialData, setData] = useState();
   const [afterData, setAfterData] = useState();
   const [longName, setLongName] = useState();
@@ -25,9 +25,29 @@ export default function Header() {
   const [loading, setLoading] = useState();
   const [isAfter, setIsAfter] = useState();
 
+  const [open, setOpen] = React.useState(false);
+
+  const toggleDrawer = function(newOpen) {
+    return function() {
+      setOpen(newOpen);
+    };
+  };
+  
   useEffect(() => {
+    fetch('/api/add', {
+      method: 'POST',
+      credentials: 'include', // 쿠키 포함
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ticker: subPath,
+      }),
+    })
+      .then(() => {})
+      .catch((err) => console.error(err));
     // WebSocket 연결 설정
-    const socket = io("http://localhost:8765/chart");
+    const socket = io("/chart");
 
     socket.on("connect", () => {
       console.log("헤더 열림!");
@@ -47,10 +67,10 @@ export default function Header() {
       console.log("받음!!!!!!!!!!!");
       const header = JSON.parse(data);
       console.log(header["%"].toFixed(2));
+      setLongName(header["name"]);
       setData(header["current"].toFixed(2));
       setAfterData(header["afterClosed"].toFixed(2));
       setIsAfter(header["isAfter"]);
-      setLongName(header["name"]);
       if (header["diff"] > 0) {
         setDiff("+" + header["diff"].toFixed(2));
         setTrend("up");
@@ -71,6 +91,11 @@ export default function Header() {
       }
       setLoading(1);
     });
+
+    socket.on("name", (data) => {
+      console.log("이름 받음");
+      setLongName(data);
+      })
 
     return () => {
       socket.close();
@@ -165,10 +190,11 @@ export default function Header() {
 
       <Stack direction="row" sx={{ gap: 1 }}>
         <Search />
-        <MenuButton showBadge aria-label="Open notifications">
-          <NotificationsRoundedIcon />
-        </MenuButton>
         <ColorModeIconDropdown />
+        <MenuButton aria-label="menu" onClick={toggleDrawer(true)}>
+            <MenuRoundedIcon />
+          </MenuButton>
+          <SideMenuMobile open={open} toggleDrawer={toggleDrawer} />
       </Stack>
     </Stack>
   );

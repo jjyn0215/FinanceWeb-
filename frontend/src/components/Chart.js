@@ -10,7 +10,7 @@ import { useParams } from "react-router-dom";
 import io from "socket.io-client"
 import { enqueueSnackbar, closeSnackbar } from 'notistack';
 import { useTheme } from "@mui/material/styles";
-
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   elderRay,
   ema,
@@ -47,7 +47,10 @@ const Mainchart = () => {
   const [height, setHeight] = useState();
   const [loading, setLoading] = useState();
   const [offline, setOffline] = useState();
-  const { "*" : subPath } = useParams();
+  const { ticker : subPath } = useParams();
+  const navigate = useNavigate();
+  const { state } = useLocation();
+
   const trendColors = {
     up:
       theme.palette.mode === "light"
@@ -81,8 +84,25 @@ const Mainchart = () => {
 
   useEffect(() => {
     // WebSocket 연결 설정
+    if (state != null && state !== undefined){
+      enqueueSnackbar(state?.message, {variant: 'info', autoHideDuration: 3000, preventDuplicate: true});
+    }
 
-    const socket = io("http://localhost:8765/chart");
+    async function fecthData() {
+      await fetch('/api/protected', {
+        method: 'GET',
+        credentials: 'include', // 쿠키 포함
+      })
+        .then(async (response) => {
+          if (response.ok) {
+          } else {
+            navigate("/SignIn");
+          }
+        })
+        .catch((err) => console.error(err));
+    } 
+    fecthData();
+    const socket = io("/chart");
 
     socket.on("connect", () => {
       closeSnackbar('offline');
@@ -97,10 +117,14 @@ const Mainchart = () => {
       enqueueSnackbar("서버와 연결 끊김", {variant: 'error', persist: true, preventDuplicate: true, key: 'offline'});
     });
 
-    socket.on("welcome", (addr) => {
-      enqueueSnackbar("환영합니다, " + addr, {variant: 'info', autoHideDuration: 3000})
-    });
+    // socket.on("welcome", (addr) => {
+    //   enqueueSnackbar("환영합니다, " + addr, {variant: 'info', autoHideDuration: 3000})
+    // });
 
+    socket.on("notFound", () => {
+      navigate("/404")
+    });
+    
     socket.on("chart", (chart) => {
       console.log("받음!")
       setData(JSON.parse(chart));
@@ -119,7 +143,8 @@ const Mainchart = () => {
     );
 
   const margin = { left: 0, right: 48, top: 0, bottom: 24 };
-
+  
+  
   const ema12 = ema()
     .id(1)
     .options({ windowSize: 12 })
@@ -138,7 +163,9 @@ const Mainchart = () => {
 
   const elder = elderRay();
 
-  const calculatedData = elder(ema26(ema12(initialData)));
+  const calculatedData = loading && initialData.length > 0
+  ? elder(ema26(ema12(initialData)))
+  : {};
   const { data, xScale, xAccessor, displayXAccessor } =
     ScaleProvider(initialData);
   const pricesDisplayFormat = format(".2f");
